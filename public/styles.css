@@ -261,8 +261,7 @@ body {
   opacity: 1;
 }
 
-.services h2,
-.gallery h2 {
+.services h2 {
   text-align: center;
   font-size: 13px;
   letter-spacing: 0.12em;
@@ -270,10 +269,6 @@ body {
   color: var(--gold);
   margin: 0 0 14px;
   font-weight: 600;
-}
-
-.gallery {
-  margin-top: 26px;
 }
 
 .gallery-grid {
@@ -301,6 +296,43 @@ body {
   height: 100%;
   object-fit: cover;
   display: block;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink-dim);
+  text-decoration: none;
+  font-size: 13px;
+  margin-bottom: 22px;
+  transition: color 0.15s ease;
+}
+
+.back-link:hover {
+  color: var(--gold-bright);
+}
+
+.gallery-page-heading {
+  text-align: center;
+  font-size: 18px;
+  letter-spacing: 0.08em;
+  color: var(--gold-bright);
+  margin: 0 0 22px;
+  font-weight: 700;
+}
+
+.gallery-grid-page {
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 10px;
+}
+
+.gallery-empty {
+  text-align: center;
+  color: var(--ink-dim);
+  font-size: 13px;
+  padding: 30px 10px;
+  margin: 0;
 }
 
 .chips {

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Galeria — Perla Event Lighting</title>
+<meta name="description" content="Foto nga dasma dhe evente me ndriçim nga Perla Event Lighting." />
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+<link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+
+<canvas id="fx" aria-hidden="true"></canvas>
+
+<main class="page">
+  <div class="card">
+
+    <div class="lang-switch" id="lang-switch" role="group" aria-label="Zgjedh gjuhën / Избери јазик / Choose language">
+      <button type="button" class="lang-btn" data-lang="sq">SQ</button>
+      <button type="button" class="lang-btn" data-lang="mk">MK</button>
+      <button type="button" class="lang-btn" data-lang="en">EN</button>
+    </div>
+
+    <a href="/" class="back-link">
+      <span aria-hidden="true">←</span>
+      <span id="back-text">Kthehu</span>
+    </a>
+
+    <h1 class="gallery-page-heading" id="gallery-page-heading">Galeria</h1>
+
+    <div class="gallery-grid gallery-grid-page" id="gallery-grid"></div>
+    <p class="gallery-empty" id="gallery-empty" hidden></p>
+
+  </div>
+</main>
+
+<script src="/icons.js"></script>
+<script src="/fx.js"></script>
+<script src="/gallery/gallery.js"></script>
+</body>
+</html>
