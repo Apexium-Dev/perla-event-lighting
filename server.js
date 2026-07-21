@@ -191,6 +191,45 @@ app.post("/api/upload-logo", requireAuth, upload.single("logo"), async (req, res
   }
 });
 
+// ---------- gallery ----------
+
+app.get("/api/gallery", async (req, res) => {
+  try {
+    res.json(await db.getGallery());
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Nuk mund të lexohet galeria." });
+  }
+});
+
+app.post("/api/gallery", requireAuth, upload.single("photo"), async (req, res) => {
+  if (!req.file) return res.status(400).json({ error: "Nuk ka skedar." });
+  try {
+    await db.ensureGalleryBucket();
+    const ext = { "image/png": "png", "image/jpeg": "jpg", "image/svg+xml": "svg", "image/webp": "webp" }[
+      req.file.mimetype
+    ];
+    const filename = `photo-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const photo = await db.addGalleryPhoto(req.file.buffer, filename, req.file.mimetype);
+    res.json(photo);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Ngarkimi i fotos dështoi." });
+  }
+});
+
+app.delete("/api/gallery/:id", requireAuth, async (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id)) return res.status(400).json({ error: "ID e pavlefshme." });
+  try {
+    await db.removeGalleryPhoto(id);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Fshirja dështoi." });
+  }
+});
+
 // ---------- QR code (generated on the fly, no disk writes) ----------
 
 const QR_OPTS = { color: { dark: "#06231a", light: "#f5f1e6" }, margin: 2, width: 800 };
@@ -234,6 +273,22 @@ app.post("/api/regenerate-qr", requireAuth, async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Përditësimi i URL-së dështoi." });
+  }
+});
+
+// ---------- keepalive (Vercel Cron hits this to stop Supabase auto-pausing) ----------
+
+app.get("/api/keepalive", async (req, res) => {
+  const secret = process.env.CRON_SECRET;
+  if (secret && req.headers.authorization !== `Bearer ${secret}`) {
+    return res.status(401).end();
+  }
+  try {
+    await db.pingDatabase();
+    res.json({ ok: true, pinged: new Date().toISOString() });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Ping dështoi." });
   }
 });
 

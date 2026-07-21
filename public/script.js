@@ -3,6 +3,7 @@ document.getElementById("year").textContent = new Date().getFullYear();
 const LANGS = ["sq", "mk", "en"];
 const DEFAULT_LANG = "sq";
 const SERVICES_HEADING = { sq: "Çfarë ofrojmë", mk: "Што нудиме", en: "What we offer" };
+const GALLERY_HEADING = { sq: "Galeria", mk: "Галерија", en: "Gallery" };
 
 function safeStorage(action) {
   try {
@@ -13,6 +14,7 @@ function safeStorage(action) {
 }
 
 let siteContent = null;
+let galleryPhotos = [];
 let currentLang = safeStorage(() => localStorage.getItem("perla-lang")) || DEFAULT_LANG;
 if (!LANGS.includes(currentLang)) currentLang = DEFAULT_LANG;
 
@@ -85,11 +87,33 @@ function renderContent(data, lang) {
   }
 }
 
+function renderGallery(photos, lang) {
+  document.getElementById("gallery-heading").textContent = GALLERY_HEADING[lang] || GALLERY_HEADING[DEFAULT_LANG];
+
+  const grid = document.getElementById("gallery-grid");
+  grid.textContent = "";
+  for (const photo of photos) {
+    const a = document.createElement("a");
+    a.href = photo.url;
+    a.target = "_blank";
+    a.rel = "noopener";
+    const img = document.createElement("img");
+    img.src = photo.url;
+    img.alt = "";
+    img.loading = "lazy";
+    a.appendChild(img);
+    grid.appendChild(a);
+  }
+
+  document.getElementById("gallery").hidden = photos.length === 0;
+}
+
 function setLanguage(lang) {
   if (!LANGS.includes(lang)) return;
   currentLang = lang;
   safeStorage(() => localStorage.setItem("perla-lang", lang));
   if (siteContent) renderContent(siteContent, currentLang);
+  renderGallery(galleryPhotos, currentLang);
 }
 
 for (const btn of document.querySelectorAll(".lang-btn")) {
@@ -103,6 +127,14 @@ fetch("/api/content", { cache: "no-store" })
     renderContent(data, currentLang);
   })
   .catch((err) => console.error("Failed to load content", err));
+
+fetch("/api/gallery", { cache: "no-store" })
+  .then((r) => r.json())
+  .then((photos) => {
+    galleryPhotos = Array.isArray(photos) ? photos : [];
+    renderGallery(galleryPhotos, currentLang);
+  })
+  .catch((err) => console.error("Failed to load gallery", err));
 
 const canvas = document.getElementById("fx");
 const ctx = canvas.getContext("2d");

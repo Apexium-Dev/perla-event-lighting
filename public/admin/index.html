@@ -99,6 +99,16 @@
     </section>
 
     <section class="panel">
+      <div class="panel-head">
+        <h2>Galeria</h2>
+        <button id="add-gallery-btn" class="btn btn-small" type="button">+ Shto foto</button>
+      </div>
+      <input type="file" id="gallery-file" accept="image/png,image/jpeg,image/webp" multiple hidden />
+      <div id="gallery-editor" class="gallery-editor-grid"></div>
+      <p class="hint">PNG, JPG ose WEBP, deri 5MB secila. Mund të zgjedhësh disa foto njëherësh.</p>
+    </section>
+
+    <section class="panel">
       <h2>QR kodi</h2>
       <div class="qr-row">
         <img id="qr-preview" class="qr-preview" alt="QR kodi" />

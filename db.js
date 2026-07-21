@@ -6,6 +6,7 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SER
 
 export const LANGS = ["sq", "mk", "en"];
 const LOGO_BUCKET = "logos";
+const GALLERY_BUCKET = "gallery";
 
 // ---------- read helpers ----------
 
@@ -178,6 +179,22 @@ export async function updateSiteUrl(url) {
   if (error) throw error;
 }
 
+// Supabase free-tier projects auto-pause after ~7 days with no API activity.
+// This reads and writes back the same value — a real query against the
+// database, but a no-op change — so a scheduled hit keeps the project warm.
+export async function pingDatabase() {
+  const { data, error: selErr } = await supabase
+    .from("company")
+    .select("id, name_sub")
+    .order("id", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+  if (selErr) throw selErr;
+  if (!data) return;
+  const { error: updErr } = await supabase.from("company").update({ name_sub: data.name_sub }).eq("id", data.id);
+  if (updErr) throw updErr;
+}
+
 // ---------- storage (logo file uploads) ----------
 
 export async function ensureLogoBucket() {
@@ -196,4 +213,61 @@ export async function uploadLogoFile(buffer, filename, contentType) {
   if (uploadErr) throw uploadErr;
   const { data } = supabase.storage.from(LOGO_BUCKET).getPublicUrl(filename);
   return `${data.publicUrl}?v=${Date.now()}`;
+}
+
+// ---------- gallery ----------
+
+export async function ensureGalleryBucket() {
+  const { data: buckets, error } = await supabase.storage.listBuckets();
+  if (error) throw error;
+  if (!buckets.some((b) => b.name === GALLERY_BUCKET)) {
+    const { error: createErr } = await supabase.storage.createBucket(GALLERY_BUCKET, { public: true });
+    if (createErr) throw createErr;
+  }
+}
+
+export async function getGallery() {
+  const company = await getCompanyRow();
+  if (!company) return [];
+  const { data, error } = await supabase
+    .from("gallery")
+    .select("id, image_url")
+    .eq("company_id", company.id)
+    .order("id", { ascending: true });
+  if (error) throw error;
+  return (data || []).map((row) => ({ id: row.id, url: row.image_url }));
+}
+
+export async function addGalleryPhoto(buffer, filename, contentType) {
+  const company = await getCompanyRow();
+  if (!company) throw new Error("No company row found.");
+
+  const { error: uploadErr } = await supabase.storage.from(GALLERY_BUCKET).upload(filename, buffer, { contentType });
+  if (uploadErr) throw uploadErr;
+  const { data: urlData } = supabase.storage.from(GALLERY_BUCKET).getPublicUrl(filename);
+
+  const { data: inserted, error: insErr } = await supabase
+    .from("gallery")
+    .insert({ company_id: company.id, image_url: urlData.publicUrl })
+    .select("id, image_url")
+    .single();
+  if (insErr) throw insErr;
+
+  return { id: inserted.id, url: inserted.image_url };
+}
+
+export async function removeGalleryPhoto(id) {
+  const { data: row, error: fetchErr } = await supabase.from("gallery").select("image_url").eq("id", id).maybeSingle();
+  if (fetchErr) throw fetchErr;
+  if (!row) return;
+
+  const marker = `/storage/v1/object/public/${GALLERY_BUCKET}/`;
+  const idx = row.image_url.indexOf(marker);
+  if (idx !== -1) {
+    const storagePath = row.image_url.slice(idx + marker.length);
+    await supabase.storage.from(GALLERY_BUCKET).remove([storagePath]);
+  }
+
+  const { error: delErr } = await supabase.from("gallery").delete().eq("id", id);
+  if (delErr) throw delErr;
 }

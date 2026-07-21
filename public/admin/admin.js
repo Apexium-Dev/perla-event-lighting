@@ -20,6 +20,8 @@ const serviceRowTemplate = document.getElementById("service-row-template");
 const loginLogo = document.getElementById("login-logo");
 const logoPreview = document.getElementById("logo-preview");
 const logoFileInput = document.getElementById("logo-file");
+const galleryEditor = document.getElementById("gallery-editor");
+const galleryFileInput = document.getElementById("gallery-file");
 const qrPreview = document.getElementById("qr-preview");
 const saveStatus = document.getElementById("save-status");
 const toast = document.getElementById("toast");
@@ -213,7 +215,83 @@ async function loadContent() {
   for (const service of data.services || []) addServiceRow(service);
 
   applyLangVisibility(document, currentEditLang);
+
+  loadGallery();
 }
+
+// ---------- gallery ----------
+
+function createGalleryItem(photo) {
+  const item = document.createElement("div");
+  item.className = "gallery-item";
+  item.dataset.id = photo.id;
+  const img = document.createElement("img");
+  img.src = photo.url;
+  img.alt = "";
+  const removeBtn = document.createElement("button");
+  removeBtn.type = "button";
+  removeBtn.className = "remove";
+  removeBtn.title = "Fshi";
+  removeBtn.textContent = "✕";
+  removeBtn.addEventListener("click", () => deleteGalleryPhoto(photo.id, item));
+  item.append(img, removeBtn);
+  return item;
+}
+
+function renderGalleryGrid(photos) {
+  galleryEditor.innerHTML = "";
+  for (const photo of photos) galleryEditor.appendChild(createGalleryItem(photo));
+}
+
+async function loadGallery() {
+  const res = await fetch("/api/gallery", { cache: "no-store" });
+  const photos = await res.json();
+  renderGalleryGrid(Array.isArray(photos) ? photos : []);
+}
+
+async function deleteGalleryPhoto(id, itemEl) {
+  itemEl.style.opacity = "0.4";
+  const res = await fetch(`/api/gallery/${id}`, { method: "DELETE" });
+  if (res.ok) {
+    itemEl.remove();
+    showToast("Foto u fshi ✓", "ok");
+  } else {
+    itemEl.style.opacity = "1";
+    const { error } = await res.json().catch(() => ({ error: "Fshirja dështoi." }));
+    showToast(error || "Fshirja dështoi.", "err");
+  }
+}
+
+async function uploadGalleryPhotos(files) {
+  for (const file of files) {
+    const placeholder = document.createElement("div");
+    placeholder.className = "gallery-item uploading";
+    placeholder.textContent = "…";
+    galleryEditor.appendChild(placeholder);
+
+    const formData = new FormData();
+    formData.append("photo", file);
+    try {
+      const res = await fetch("/api/gallery", { method: "POST", body: formData });
+      if (!res.ok) {
+        const { error } = await res.json().catch(() => ({}));
+        throw new Error(error || "Ngarkimi dështoi.");
+      }
+      const photo = await res.json();
+      placeholder.replaceWith(createGalleryItem(photo));
+    } catch (err) {
+      placeholder.remove();
+      showToast(err.message || "Ngarkimi dështoi.", "err");
+    }
+  }
+}
+
+document.getElementById("add-gallery-btn").addEventListener("click", () => galleryFileInput.click());
+galleryFileInput.addEventListener("change", () => {
+  const files = [...galleryFileInput.files];
+  galleryFileInput.value = "";
+  if (files.length) uploadGalleryPhotos(files);
+});
 
 // ---------- auth ----------
 

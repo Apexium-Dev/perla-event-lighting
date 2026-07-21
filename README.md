@@ -64,6 +64,14 @@ Uploaded logos go to a public Supabase Storage bucket called `logos` (created au
 first time you use `/admin`'s upload, via `ensureLogoBucket()` in `db.js`). The `company.logo`
 column stores the resulting public URL.
 
+### Gallery
+
+A seventh table, `gallery` (`id`, `company_id`, `image_url`), holds wedding/event photos shown in
+their own section on the public page. Photos upload straight to a public Storage bucket called
+`gallery`; unlike links/services, gallery photos are managed with immediate add/delete API calls
+(`POST` / `DELETE /api/gallery`) rather than being part of the batched Save — closer to how the
+logo upload works. The section hides itself on the public page when there are no photos yet.
+
 ## Admin panel (`/admin`)
 
 Log in with the password in `.env`, then you can:
@@ -72,6 +80,7 @@ Log in with the password in `.env`, then you can:
 - Upload a new logo (PNG/JPG/SVG/WEBP, up to 5MB)
 - Add, remove, reorder, and edit every link (icon, title, subtitle per language, URL, "primary" highlight)
 - Add/remove service chips (icon + text per language)
+- Upload/delete gallery photos (wedding & event shots) — saves immediately, not part of the batched Save
 - Update the site URL and regenerate the QR code in one click
 
 The **Ruaj** button in the top bar and the one at the bottom of the form both save everything —
@@ -113,12 +122,23 @@ Generated on the fly at `/api/qr.png` and `/api/qr.svg` from the current `siteUr
 written to disk, so it always reflects whatever's saved, including on Vercel. Update the URL via
 the admin panel's "Rigjenero QR kodin" button (or by editing the site URL and saving).
 
+## Keeping Supabase awake
+
+Free-tier Supabase projects pause automatically after about a week with no API activity. A Vercel
+Cron Job hits `/api/keepalive` once a day (`vercel.json` → `crons`), which does a harmless
+read-then-write-back on the company row — a real query, but a no-op change — just to register
+activity and stop the project from pausing.
+
+Optionally set a `CRON_SECRET` env var in Vercel; if present, the endpoint only accepts requests
+carrying that value in the `Authorization: Bearer` header, which Vercel adds automatically to its
+own cron requests. Without it, the endpoint is open (harmless, but anyone could trigger a ping).
+
 ## Deploying to Vercel
 
 1. **Set environment variables** in the Vercel project (Dashboard → Settings → Environment
    Variables, or `vercel env add`): `ADMIN_PASSWORD`, `SESSION_SECRET`, `SUPABASE_URL`,
-   `SUPABASE_SERVICE_ROLE_KEY` — same values as your local `.env`. Never put these in `vercel.json`
-   or any committed file.
+   `SUPABASE_SERVICE_ROLE_KEY`, and optionally `CRON_SECRET` — same values as your local `.env`.
+   Never put these in `vercel.json` or any committed file.
 2. Deploy:
    ```
    vercel          # preview deployment
