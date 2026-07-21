@@ -1,0 +1,26 @@
+{
+  "name": "perlalights",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "admin": "node server.js",
+    "seed": "node scripts/seed-supabase.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "devDependencies": {
+    "lucide-static": "^1.25.0"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.110.7",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "multer": "^2.2.0",
+    "qrcode": "^1.5.4"
+  }
+}

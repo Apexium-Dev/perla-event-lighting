@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Perla Event Lighting</title>
+<meta name="description" content="Ndriçim profesional për evente — dasma, ditëlindje, koncerte. Professional event lighting." />
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<canvas id="fx" aria-hidden="true"></canvas>
+
+<main class="page">
+  <div class="card">
+
+    <div class="lang-switch" id="lang-switch" role="group" aria-label="Zgjedh gjuhën / Избери јазик / Choose language">
+      <button type="button" class="lang-btn" data-lang="sq">SQ</button>
+      <button type="button" class="lang-btn" data-lang="mk">MK</button>
+      <button type="button" class="lang-btn" data-lang="en">EN</button>
+    </div>
+
+    <div class="brand">
+      <div class="logo-ring">
+        <img id="brand-logo" src="assets/logo.svg" alt="Perla Event Lighting logo" class="logo" />
+      </div>
+      <h1 class="name">
+        <span id="brand-name">PERLA</span>
+        <span id="brand-name-sub">EVENT LIGHTING</span>
+      </h1>
+      <p class="tagline" id="brand-tagline"></p>
+      <p class="location" id="brand-location"></p>
+    </div>
+
+    <nav class="links" id="links-list" aria-label="Perla Event Lighting links"></nav>
+
+    <section id="gallery" class="services">
+      <h2 id="services-heading"></h2>
+      <div class="chips" id="services-chips"></div>
+    </section>
+
+    <footer class="foot">
+      <p>© <span id="year"></span> Perla Event Lighting</p>
+      <p class="foot-sub" id="footer-note"></p>
+    </footer>
+
+  </div>
+</main>
+
+<script src="icons.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

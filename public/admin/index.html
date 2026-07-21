@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Perla Admin</title>
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
+<link rel="stylesheet" href="admin.css" />
+</head>
+<body>
+
+<div id="toast" class="toast" hidden></div>
+
+<div id="login-screen" class="screen">
+  <form id="login-form" class="login-card">
+    <img id="login-logo" src="../assets/logo.svg" alt="Perla" class="login-logo" />
+    <h1>Perla Admin</h1>
+    <p class="hint">Fut fjalëkalimin për të vazhduar.</p>
+    <input type="password" id="password" placeholder="Fjalëkalimi" autocomplete="current-password" required />
+    <button type="submit">Hyr</button>
+    <p id="login-error" class="error" hidden></p>
+  </form>
+</div>
+
+<div id="dashboard-screen" class="screen" hidden>
+  <header class="topbar">
+    <h1>Perla Admin</h1>
+    <div class="topbar-actions">
+      <button id="save-btn-top" class="btn btn-primary btn-small" type="button">Ruaj</button>
+      <a href="/" target="_blank" class="btn btn-ghost">Shiko faqen ↗</a>
+      <button id="logout-btn" class="btn btn-ghost">Dil</button>
+    </div>
+  </header>
+
+  <div class="edit-lang-bar">
+    <span class="edit-lang-label">Duke redaktuar:</span>
+    <div class="edit-lang-tabs" id="edit-lang-tabs">
+      <button type="button" class="edit-lang-btn" data-lang-tab="sq">Shqip</button>
+      <button type="button" class="edit-lang-btn" data-lang-tab="mk">Македонски</button>
+      <button type="button" class="edit-lang-btn" data-lang-tab="en">English</button>
+    </div>
+  </div>
+
+  <main class="wrap">
+
+    <section class="panel">
+      <h2>Marka</h2>
+      <div class="grid-2">
+        <label>Emri
+          <input id="f-name" type="text" />
+        </label>
+        <label>Nën-titulli
+          <input id="f-nameSub" type="text" />
+        </label>
+        <label>Tagline
+          <input class="f-tagline" data-lang="sq" type="text" />
+          <input class="f-tagline" data-lang="mk" type="text" hidden />
+          <input class="f-tagline" data-lang="en" type="text" hidden />
+        </label>
+        <label>Lokacioni
+          <input class="f-location" data-lang="sq" type="text" />
+          <input class="f-location" data-lang="mk" type="text" hidden />
+          <input class="f-location" data-lang="en" type="text" hidden />
+        </label>
+        <label>Fusnota
+          <input class="f-footerNote" data-lang="sq" type="text" />
+          <input class="f-footerNote" data-lang="mk" type="text" hidden />
+          <input class="f-footerNote" data-lang="en" type="text" hidden />
+        </label>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Logo</h2>
+      <div class="logo-row">
+        <img id="logo-preview" class="logo-preview" alt="Logo aktual" />
+        <div class="logo-controls">
+          <input type="file" id="logo-file" accept="image/png,image/jpeg,image/svg+xml,image/webp" />
+          <button id="logo-upload-btn" class="btn" type="button">Ngarko logon</button>
+          <p class="hint">PNG, JPG, SVG ose WEBP, deri 5MB.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Linqet</h2>
+        <button id="add-link-btn" class="btn btn-small" type="button">+ Shto link</button>
+      </div>
+      <div id="links-editor" class="rows"></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Shërbimet</h2>
+        <button id="add-service-btn" class="btn btn-small" type="button">+ Shto shërbim</button>
+      </div>
+      <div id="services-editor" class="rows"></div>
+    </section>
+
+    <section class="panel">
+      <h2>QR kodi</h2>
+      <div class="qr-row">
+        <img id="qr-preview" class="qr-preview" alt="QR kodi" />
+        <div class="qr-controls">
+          <label>URL e faqes
+            <input id="f-siteUrl" type="url" placeholder="https://..." />
+          </label>
+          <button id="regen-qr-btn" class="btn" type="button">Rigjenero QR kodin</button>
+          <p class="hint">Përditëso URL-në kur faqja të vendoset online, pastaj rigjenero QR-in.</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="save-bar">
+      <button id="save-btn" class="btn btn-primary" type="button">Ruaj ndryshimet</button>
+      <span id="save-status" class="save-status"></span>
+    </div>
+
+  </main>
+</div>
+
+<template id="link-row-template">
+  <div class="row link-row">
+    <div class="icon-picker">
+      <span class="icon-preview"></span>
+      <select class="link-icon"></select>
+    </div>
+    <div class="row-fields">
+      <input class="link-title" data-lang="sq" type="text" placeholder="Titulli (SQ)" />
+      <input class="link-title" data-lang="mk" type="text" placeholder="Наслов (MK)" hidden />
+      <input class="link-title" data-lang="en" type="text" placeholder="Title (EN)" hidden />
+      <input class="link-subtitle" data-lang="sq" type="text" placeholder="Nën-titulli (SQ)" />
+      <input class="link-subtitle" data-lang="mk" type="text" placeholder="Поднаслов (MK)" hidden />
+      <input class="link-subtitle" data-lang="en" type="text" placeholder="Subtitle (EN)" hidden />
+      <input class="link-url" type="text" placeholder="https:// ose tel: ose mailto:" />
+      <label class="link-primary-label">
+        <input class="link-primary" type="checkbox" /> Kryesor
+      </label>
+    </div>
+    <div class="row-actions">
+      <button type="button" class="icon-btn move-up" title="Lëviz lart">↑</button>
+      <button type="button" class="icon-btn move-down" title="Lëviz poshtë">↓</button>
+      <button type="button" class="icon-btn remove" title="Fshi">✕</button>
+    </div>
+  </div>
+</template>
+
+<template id="service-row-template">
+  <div class="row service-row">
+    <div class="icon-picker">
+      <span class="icon-preview"></span>
+      <select class="service-icon"></select>
+    </div>
+    <div class="service-text-fields">
+      <input class="service-text" data-lang="sq" type="text" placeholder="Shërbimi (SQ)" />
+      <input class="service-text" data-lang="mk" type="text" placeholder="Услуга (MK)" hidden />
+      <input class="service-text" data-lang="en" type="text" placeholder="Service (EN)" hidden />
+    </div>
+    <button type="button" class="icon-btn remove" title="Fshi">✕</button>
+  </div>
+</template>
+
+<script src="../icons.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>
